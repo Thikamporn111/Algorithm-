@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Algorithm Tasks — หน้าละเดโม (เล่นได้จริง)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; }
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .glass {
+      backdrop-filter: saturate(160%) blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      background: rgba(15,23,42,.55);
+      border: 1px solid rgba(255,255,255,.12);
+      overflow: auto;
+    }
+    .btn { transition: transform .12s ease, box-shadow .2s ease, opacity .12s ease; }
+    .btn:active { transform: translateY(1px) scale(0.99); }
+    .chip {
+      background: linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.12));
+      border: 1px solid rgba(255,255,255,0.25);
+      backdrop-filter: blur(6px);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 999px; opacity: .45; transition: opacity .2s ease, transform .2s ease; }
+    .dot.active { opacity: 1; transform: scale(1.2); }
+    .slide { display: none; }
+    .slide[aria-current="true"] { display: block; }
+    .box { border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); }
+    /* Emphasize Bubble, Selection, Insertion, Merge & Quick input numbers */
+    #bubble-list .box, #selection-list .box, #insertion-list .box, #merge-list .box, #quick-list .box, #heap-list .box {
+      background: linear-gradient(135deg, rgba(99,102,241,0.35), rgba(217,70,239,0.28));
+      border-color: rgba(217,70,239,0.6);
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(217,70,239,0.18), inset 0 0 0 1px rgba(255,255,255,0.12);
+      font-size: 1rem; /* slightly larger for emphasis */
+      padding: 0.5rem 0.75rem; /* balance size with spacing */
+      border-radius: 0.9rem;
+    }
+    .bucket { border: 1px dashed rgba(255,255,255,.25); background: rgba(255,255,255,.05); }
+    @media print {
+      body { background: #fff; }
+      #topbar, #nav, #dots, #helpTip { display: none !important; }
+      .slide { display: block !important; page-break-after: always; color: #000; }
+      .glass, .card, .chip { background: transparent !important; border: 1px solid #ddd !important; }
+      .text-white, .text-slate-200, .text-slate-300, .text-slate-400 { color: #000 !important; }
+      .bg-gradient-to-br, .bg-gradient-to-r, .from-*, .to-* { background: none !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1220] to-[#1e1b4b] text-white">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Top bar -->
+    <div id="topbar" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div class="flex items-center gap-3"></div>
+      <div class="flex items-center gap-2">
+        <label class="sr-only" for="jump">ไปหน้า</label>
+        <select id="jump" class="rounded-xl bg-white/10 border border-white/20 px-3 py-2 text-sm text-black">
+          <option value="0">หน้าแรก (สารบัญ)</option>
+          <option value="1">อัลกอริทึมคืออะไร?</option>
+          <option value="2">เกณฑ์อัลกอริทึมที่ดี</option>
+          <option value="3">Bubble Sort</option>
+          <option value="4">Selection Sort</option>
+          <option value="5">Insertion Sort</option>
+          <option value="6">Merge Sort</option>
+          <option value="7">Quick Sort</option>
+          <option value="8">Heap Sort</option>
+          <option value="9">Counting Sort</option>
+          <option value="10">Radix Sort</option>
+          <option value="11">Linear Search</option>
+          <option value="12">Binary Search</option>
+          <option value="13">Hash Table</option>
+          <option value="14">จบการนำเสนอ</option>
+        </select>
+        <button id="btnPrint" class="btn rounded-xl px-3.5 py-2 bg-white/10 hover:bg-white/15 border border-white/20 text-sm">พิมพ์เป็น PDF</button>
+        <button id="btnPrev" class="btn rounded-xl px-3.5 py-2 bg-white/10 hover:bg-white/15 border border-white/20 text-sm">⟵ ย้อนกลับ</button>
+        <button id="btnNext" class="btn rounded-xl px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-sm font-semibold shadow-lg shadow-emerald-900/30">ถัดไป ⟶</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div id="nav" class="glass rounded-2xl p-4 mb-5">
+      <div class="flex items-center justify-between gap-4">
+        <div class="text-sm font-semibold">Algorithm Tasks</div>
+        <div class="text-xs text-slate-300">
+          หน้า <span id="cur">1</span>/<span id="total">13</span>
+        </div>
+      </div>
+      <div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
+        <div id="bar" class="h-full w-[9%] bg-gradient-to-r from-indigo-500 to-fuchsia-500"></div>
+      </div>
+      <div id="dots" class="mt-3 flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- Slides -->
+    <section id="slides" class="space-y-6">
+      <!-- 0. Index -->
+      <section class="slide" aria-current="true">
+        <div class="glass rounded-3xl p-8 md:p-10">
+          <div class="flex items-center gap-4">
+            <div class="text-5xl md:text-6xl">🧠</div>
+            <div>
+              <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-emerald-400 text-transparent bg-clip-text drop-shadow-lg">Summary Algorithm</h1>
+              <p class="mt-1 text-slate-300 text-sm hidden">สรุปข้อมูลอาจารย์ที่ปรึกษาและรายชื่อผู้จัดทำ</p>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6 mt-6">
+            <div class="card rounded-2xl p-5">
+              <div class="text-sm uppercase tracking-wider text-slate-300">อาจารย์ที่ปรึกษา</div>
+              <div class="mt-2 text-lg font-bold">ผู้ช่วยศาสตราจารย์ ดร. บุรัสกร อยู่สุข.</div>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-sm uppercase tracking-wider text-slate-300">ผู้จัดทำ</div>
+              <ol class="list-decimal pl-5 space-y-1">
+                <li class="flex items-center justify-between gap-3">
+                  <span>นางสาวทิฆัมพร มีหิรัญ.</span>
+                  <span class="chip rounded-full px-2.5 py-1 text-xs">1</span>
+                </li>
+                <li class="flex items-center justify-between gap-3">
+                  <span>นายดนุพงศ์ คงศิลา.</span>
+                  <span class="chip rounded-full px-2.5 py-1 text-xs">2</span>
+                </li>
+                <li class="flex items-center justify-between gap-3">
+                  <span>นางสาวอภิสรา จันทวิเศษ.</span>
+                  <span class="chip rounded-full px-2.5 py-1 text-xs">3</span>
+                </li>
+                <li class="flex items-center justify-between gap-3">
+                  <span>นายเกียรติคุณ ขุนเม่น.</span>
+                  <span class="chip rounded-full px-2.5 py-1 text-xs">4</span>
+                </li>
+                <li class="flex items-center justify-between gap-3">
+                  <span>นายวัชรพล เหลืองอรุณ.</span>
+                  <span class="chip rounded-full px-2.5 py-1 text-xs">5</span>
+                </li>
+                <li class="flex items-center justify-between gap-3">
+                  <span>นายกิตติพงษ์ กำ ลังรัมย์.</span>
+                  <span class="chip rounded-full px-2.5 py-1 text-xs">6</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="mt-6 text-xs text-slate-300">ใช้เมนู “ไปหน้า” ด้านบนเพื่อไปยังหน้าเดโมอัลกอริทึม</div>
+        </div>
+      </section>
+
+      <!-- 1. What is Algorithm -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">อัลกอริทึมคืออะไร?</h2>
+
+          <div class="mt-3 rounded-2xl p-5 bg-gradient-to-br from-cyan-500/25 via-sky-500/15 to-indigo-500/10 border border-cyan-300/60 shadow-lg shadow-cyan-900/20">
+            <div class="flex items-start gap-3">
+              <div class="text-xl">✨</div>
+              <p class="text-sm leading-relaxed text-cyan-50/95">
+                อัลกอริทึม คือ ชุดขั้นตอนสั้นๆ ที่บอกว่า “ทำอะไรก่อน–หลัง” เพื่อแก้ปัญหาให้ได้ผลลัพธ์เดิมทุกครั้ง คล้ายสูตรทำอาหารหรือเช็กลิสต์งาน
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <div class="text-sm font-semibold mb-2">ข้อดี 3 ข้อ (บูลเล็ตอ่านเร็ว)</div>
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-emerald-500/25 to-emerald-500/10 border border-emerald-400/60 shadow-lg shadow-emerald-900/20">
+                <div class="flex items-start gap-3">
+                  <span class="text-xl">✅</span>
+                  <div class="text-sm">
+                    <div class="font-semibold text-emerald-100">ชัดเจน ทำซ้ำได้</div>
+                    <div class="text-emerald-50/90 text-xs">ใครทำตามขั้นตอนก็ได้ผลเหมือนกัน</div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-sky-500/25 to-sky-500/10 border border-sky-400/60 shadow-lg shadow-sky-900/20">
+                <div class="flex items-start gap-3">
+                  <span class="text-xl">⚡</span>
+                  <div class="text-sm">
+                    <div class="font-semibold text-sky-100">ทำงานไวขึ้น</div>
+                    <div class="text-sky-50/90 text-xs">เลือกวิธีที่ใช้เวลาน้อยลง</div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-amber-500/30 to-amber-500/10 border border-amber-400/60 shadow-lg shadow-amber-900/20">
+                <div class="flex items-start gap-3">
+                  <span class="text-xl">📊</span>
+                  <div class="text-sm">
+                    <div class="font-semibold text-amber-100">วัดและเปรียบเทียบได้</div>
+                    <div class="text-amber-50/90 text-xs">ใช้ Big‑O ประเมินประสิทธิภาพ</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="text-sm font-semibold mb-2">ตัวอย่างรอบตัว</div>
+            <div class="grid md:grid-cols-3 gap-4 text-sm">
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-rose-500/30 to-rose-500/10 border border-rose-400/60 shadow-lg shadow-rose-900/20">
+                <div class="flex items-start gap-2">
+                  <span class="text-lg">🍵</span>
+                  <div>
+                    <div class="font-semibold text-rose-50">ชงกาแฟ</div>
+                    <div class="flex items-center flex-wrap gap-2 mt-1">
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:0s">ต้มน้ำ</span>
+                      <span class="opacity-70 animate-bounce">→</span>
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:.25s">ใส่ผง</span>
+                      <span class="opacity-70 animate-bounce">→</span>
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:.5s">เติมน้ำร้อน</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-indigo-500/30 to-indigo-500/10 border border-indigo-400/60 shadow-lg shadow-indigo-900/20">
+                <div class="flex items-start gap-2">
+                  <span class="text-lg">📱</span>
+                  <div>
+                    <div class="font-semibold text-indigo-50">หาเบอร์เพื่อน</div>
+                    <div class="flex items-center flex-wrap gap-2 mt-1">
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:0s">เปิดรายชื่อ</span>
+                      <span class="opacity-70 animate-bounce">→</span>
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:.25s">พิมพ์ชื่อ</span>
+                      <span class="opacity-70 animate-bounce">→</span>
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:.5s">กดโทร</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-2xl p-4 bg-gradient-to-br from-fuchsia-500/30 to-fuchsia-500/10 border border-fuchsia-400/60 shadow-lg shadow-fuchsia-900/20">
+                <div class="flex items-start gap-2">
+                  <span class="text-lg">📚</span>
+                  <div>
+                    <div class="font-semibold text-fuchsia-50">จัดหนังสือ</div>
+                    <div class="flex items-center flex-wrap gap-2 mt-1">
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:0s">แยกหมวด</span>
+                      <span class="opacity-70 animate-bounce">→</span>
+                      <span class="chip rounded-full px-2.5 py-1 animate-pulse" style="animation-delay:.25s">เรียง A→Z</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl p-4 border border-white/10 bg-white/5">
+            <div class="text-xs text-slate-300 mb-1">กล่อง “จำให้ง่าย”</div>
+            <ul class="text-sm list-disc pl-5 space-y-1">
+              <li>เขียนขั้นตอนให้สั้น กระชับ ครบ</li>
+              <li>ทดสอบหลายกรณีให้แน่ใจว่าถูก</li>
+              <li>เลือกวิธีที่เร็วและใช้ทรัพยากรน้อย</li>
+            </ul>
+          </div>
+
+
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">เกณฑ์อัลกอริทึมที่ดี — สรุปอ่านง่าย</h2>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 4 เกณฑ์</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li class="marker:text-emerald-400"><b class="text-emerald-300">ถูกต้อง (Correctness)</b>: ให้ผลลัพธ์ถูกต้องตามปัญหาทุกกรณี</li>
+                <li class="marker:text-sky-400"><b class="text-sky-300">ชัดเจนเป็นขั้นตอน (Definiteness)</b>: คำสั่งไม่กำกวม มีจุดเริ่มและจบชัดเจน</li>
+                <li class="marker:text-amber-400"><b class="text-amber-300">มีประสิทธิภาพ (Efficiency)</b>: เวลาและหน่วยความจำเหมาะสม</li>
+                <li class="marker:text-fuchsia-400"><b class="text-fuchsia-300">เข้าใจง่าย (Clarity)</b>: อ่านง่าย อธิบาย/ทวนสอบได้</li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-sm font-semibold text-white mb-3">ตาราง Big-O — อธิบายเข้าใจง่าย</div>
+              <div id="big-o" class="space-y-2 text-xs">
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 border-emerald-400/40 hover:border-emerald-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-emerald-400 text-black font-semibold">O(1)</span>
+                      <span class="text-emerald-100/90">เข้าถึงสมาชิกอาร์เรย์ตามดัชนี ⚡️</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-emerald-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-emerald-50 leading-relaxed">เร็วปุ๊บปั๊บ ข้อมูลจะกี่ตัวก็ใช้เวลาเท่าเดิม เช่น “หยิบของจากช่องที่ i” ในอาร์เรย์</div>
+                </details>
+
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-sky-500/20 to-sky-400/10 border-sky-400/40 hover:border-sky-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-sky-400 text-black font-semibold">O(log n)</span>
+                      <span class="text-sky-100/90">Binary Search 🔎</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-sky-50 leading-relaxed">ตัดครึ่งทางทุกครั้ง เหมือนทายเลขแล้วถาม “มากกว่าหรือน้อยกว่า?” ทำให้รอบน้อยลงเรื่อยๆ แม้ข้อมูลเยอะมาก</div>
+                </details>
+
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-amber-500/25 to-amber-400/10 border-amber-400/40 hover:border-amber-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-amber-400 text-black font-semibold">O(n)</span>
+                      <span class="text-amber-100/90">Linear Search ✳️</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-amber-50 leading-relaxed">เดินเช็คทีละตัวแบบเพื่อนช่วยหา ของเยอะก็ใช้เวลามากขึ้นตามจำนวนชิ้น</div>
+                </details>
+
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-violet-500/25 to-violet-400/10 border-violet-400/40 hover:border-violet-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-violet-400 text-black font-semibold">O(n log n)</span>
+                      <span class="text-violet-100/90">Merge / Quick (เฉลี่ย) 🧩</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-violet-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-violet-50 leading-relaxed">แบ่งงานเป็นก้อนเล็กๆ แล้วรวมกลับ (divide & conquer) ชั้นงานมีประมาณ log n แต่ละชั้นรวมๆ ทำราว n จึงได้ n log n — ใช้จริงบ่อย</div>
+                </details>
+
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-fuchsia-500/25 to-fuchsia-400/10 border-fuchsia-400/40 hover:border-fuchsia-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-fuchsia-400 text-black font-semibold">O(n^2)</span>
+                      <span class="text-fuchsia-100/90">Bubble, Selection, Insertion 🐢</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-fuchsia-50 leading-relaxed">วนซ้อนสองชั้น เปรียบเทียบกันเยอะ งานบานเมื่อข้อมูลเยอะ เหมาะกับงานเล็กหรือข้อมูลเกือบเรียงอยู่แล้ว</div>
+                </details>
+
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-orange-500/25 to-orange-400/10 border-orange-400/40 hover:border-orange-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-orange-400 text-black font-semibold">O(2^n)</span>
+                      <span class="text-orange-100/90">Fibonacci แบบ naïve 🌱</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-orange-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-orange-50 leading-relaxed">เพิ่มสมาชิกอีก 1 งานคูณสองทันที เพราะแตกกิ่งหลายทางซ้ำๆ เช่น ฟีโบนัชชีแบบเรียกซ้ำตรงๆ (ไม่แคชค่าเดิม)</div>
+                </details>
+
+                <details class="group rounded-xl p-3 border transition-all bg-gradient-to-r from-rose-500/25 to-rose-400/10 border-rose-400/40 hover:border-rose-300/70">
+                  <summary class="flex items-center justify-between cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[11px] bg-rose-400 text-black font-semibold">O(n!)</span>
+                      <span class="text-rose-100/90">TSP แบบ brute‑force 💥</span>
+                    </div>
+                    <span class="flex items-center gap-2 text-rose-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180">▾</span></span>
+                  </summary>
+                  <div class="mt-3 text-rose-50 leading-relaxed">ลองทุกลำดับที่เป็นไปได้ จำนวนกรณีระเบิดขึ้นแบบแฟกทอเรียล ใช้ได้เฉพาะ n เล็กจริงๆ</div>
+                </details>
+              </div>
+              <div class="mt-3 text-[11px] text-slate-300">ทิป: ค่าต่ำกว่ามักเร็วกว่าเมื่อข้อมูลใหญ่ แต่ดูด้วยว่ามีค่าเริ่มต้น/ข้อจำกัดอื่นๆ หรือเปล่า</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Template per Task: รายการ 11 หน้า -->
+      <!-- 1. Bubble Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold flex flex-wrap items-center gap-2">
+          <span>Bubble Sort — Demo</span>
+        </h2>
+        <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+          คือ อัลกอริทึมเรียงลำดับแบบง่ายที่เปรียบเทียบค่าทีละคู่ที่อยู่ติดกัน แล้วสลับตำแหน่งถ้าหน้ามากกว่าหลัง ทำซ้ำเป็นรอบ ๆ จนกว่าจะไม่มีการสลับอีก
+        </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: เทียบคู่ติดกันแล้วสลับ</li>
+                <li><b>อัลกอริทึม</b>: วนรอบเปรียบเทียบ a[j], a[j+1]</li>
+                <li><b>โปรแกรม</b>: ดูโค้ดภาษา C ด้านล่าง</li>
+                <li><b>ผลการทำงาน</b>: เหมาะข้อมูลน้อย/เกือบเรียง</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n²)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">เทียบสลับประมาณ n×n ครั้ง</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n)</b></span></div>
+                        <span class="text-emerald-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-emerald-50 leading-relaxed">ถ้าข้อมูลเรียงอยู่แล้ว ตรวจรอบเดียวจบ</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>:เวลาในการจัดการพื้นที่ <b>O(1)</b></span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">ทำงานในที่เดิม ไม่เปลืองแรม</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable</span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">Stable คงลำดับของข้อมูลที่ซ้ำกัน</div>
+                    </details>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [5, 1, 4, 2] • ตัวเลขกดไม่ได้</div>
+              <div id="bubble-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="bubble-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="bubble-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="bubble-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="bubble-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="bubble-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="bubble-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="bubble-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="bubble-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Bubble Sort (C)
+void bubble_sort(int a[], int n){
+  for(int i=0;i&lt;n-1;i++){
+    int swapped=0;
+    for(int j=0;j&lt;n-1-i;j++){
+      if(a[j]&gt;a[j+1]){
+        int t=a[j]; a[j]=a[j+1]; a[j+1]=t;
+        swapped=1;
+      }
+    }
+    if(!swapped) break;
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Selection Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Selection Sort — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คืออัลกอริทึมเรียงลำดับแบบง่ายที่ใช้หลักการ “เลือกค่าที่เล็กที่สุด (หรือใหญ่ที่สุด) ในช่วงที่เหลือ แล้วเอามาวางที่ตำแหน่งปัจจุบัน” ทำซ้ำไปเรื่อย ๆ จนเรียงครบทั้งลิสต์
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: เลือกค่าน้อยสุดมาวางทีละที่</li>
+                <li><b>อัลกอริทึม</b>: ค้นหา min ในช่วง i..ท้าย แล้วสลับ</li>
+                <li><b>โปรแกรม</b>: ดูโค้ดภาษา C ด้านล่าง</li>
+                <li><b>ผลการทำงาน</b>: สลับน้อย แต่ยังช้า</li>
+                <li class="space-y-2">
+  <div class="flex items-center gap-2">
+    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+  </div>
+  <div class="space-y-2">
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n²)</b></span></div>
+        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">ต้องวนหา “ค่าต่ำสุด” ของช่วงที่เหลือ แล้วสลับตำแหน่งทุกครั้ง → ทำครบ n รอบ</div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n²)</b></span></div>
+        <span class="text-emerald-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-emerald-50 leading-relaxed">ถึงข้อมูลจะเรียงแล้วก็ยังต้องหา min ในทุกตำแหน่ง → ไม่ได้เร็วขึ้น</div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(1)</b></span></div>
+        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-sky-50 leading-relaxed">ทำงานในลิสต์เดิม (In-place) ไม่ใช้หน่วยความจำเพิ่ม</div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-rose-300 font-semibold">❌ ไม่ Stable</span></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">ถ้าค่าซ้ำกัน อาจสลับลำดับของข้อมูลที่ซ้ำ ทำให้ตำแหน่งเปลี่ยน</div>
+    </details>
+  </div>
+</li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [7, 3, 5, 2] • ตัวเลขกดไม่ได้</div>
+              <div id="selection-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="selection-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="selection-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="selection-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="selection-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="selection-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="selection-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="selection-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="selection-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Selection Sort (C)
+void selection_sort(int a[], int n){
+  for(int i=0;i&lt;n-1;i++){
+    int minIdx=i;
+    for(int j=i+1;j&lt;n;j++)
+      if(a[j]&lt;a[minIdx]) minIdx=j;
+    if(minIdx!=i){
+      int t=a[i]; a[i]=a[minIdx]; a[minIdx]=t;
+    }
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Insertion Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Insertion Sort — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คืออัลกอริทึมการเรียงลำดับที่ทำงานโดย หยิบข้อมูลทีละตัวแล้ว “แทรก” ไปในตำแหน่งที่ถูกต้องในส่วนที่เรียงแล้ว ทำซ้ำจนกว่าข้อมูลทั้งหมดจะเรียงเสร็จ
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: ส่วนซ้ายเรียงแล้ว แทรกค่าถัดไป</li>
+                <li><b>อัลกอริทึม</b>: เลื่อนค่าที่มากกว่า key ไปขวา แล้ววาง key</li>
+                <li><b>โปรแกรม</b>: ดูโค้ดภาษา C ด้านล่าง</li>
+                <li><b>ผลการทำงาน</b>: เด่นเมื่อ “เกือบเรียง”</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n²)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">แทรกทีละตัวและมักต้อง “เลื่อน” ค่าก่อนหน้า หลายตำแหน่งในแต่ละรอบ → รวมแล้ว ~ n² การเปรียบเทียบ/เลื่อน</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n)</b></span></div>
+                        <span class="text-emerald-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-emerald-50 leading-relaxed">ถ้าข้อมูลเรียงอยู่แล้ว (หรือเกือบเรียง) วนตรวจรอบเดียว แทบไม่ต้องเลื่อนค่า</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(1)</b></span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">ทำงานในลิสต์เดิม (In-place) ใช้ตัวแปร key ชั่วคราวเท่านั้น</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold">✅ Stable</span></span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">ค่าที่ซ้ำกันจะคง “ลำดับเดิม” (ทิป: ใช้เงื่อนไข &gt; ไม่ใช้ &gt;= ในการเปรียบเทียบ เพื่อคงความเสถียร)</div>
+                    </details>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [9, 1, 4, 3] • ตัวเลขกดไม่ได้</div>
+              <div id="insertion-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="insertion-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="insertion-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="insertion-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="insertion-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="insertion-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="insertion-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="insertion-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="insertion-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Insertion Sort (C)
+void insertion_sort(int a[], int n){
+  for(int i=1;i&lt;n;i++){
+    int key=a[i], j=i-1;
+    while(j&gt;=0 &amp;&amp; a[j]&gt;key){ a[j+1]=a[j]; j--; }
+    a[j+1]=key;
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Merge Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Merge Sort — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ อัลกอริทึมเรียงลำดับแบบ divide &amp; conquer<br>
+            แนวคิดสั้น ๆ: แบ่งครึ่ง → เรียงครึ่งซ้าย/ขวา → ผสาน (merge) ให้เรียง ทำซ้ำจนลิสต์ย่อยเหลือขนาด 1
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: แบ่งครึ่งจนย่อยสุดแล้วผสานกลับ</li>
+                <li><b>อัลกอริทึม</b>: แบ่ง → เรียงซ้าย/ขวา → ผสาน</li>
+                <li><b>โปรแกรม</b>: ใช้ buffer ผสานค่า</li>
+                <li><b>ผลการทำงาน</b>: Stable แต่ใช้พื้นที่เพิ่ม</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n log n)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">แบ่งครึ่งเป็นชั้น ๆ ประมาณ log n ชั้น และทุกชั้นต้องผสาน (merge) ข้อมูลรวม ๆ กันขนาด n → รวมแล้ว n × log n</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n log n)</b></span></div>
+                        <span class="text-emerald-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-emerald-50 leading-relaxed">แม้ข้อมูลจะเรียงอยู่แล้ว ก็ยังต้องแบ่งและผสานครบทุกชั้น จึงไม่ลดลงเป็น O(n)</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(n)</b></span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">ต้องมีอาร์เรย์ช่วยสำหรับการผสาน ขนาดใกล้เคียงกับข้อมูลทั้งหมด (จึงไม่เป็น in-place)</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold">✅ Stable</span></span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">หากขั้นตอนผสานรักษาลำดับของค่าที่เท่ากัน ลำดับเดิมจะไม่เปลี่ยน (โดยทั่วไป Merge Sort ทำได้)</div>
+                    </details>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [8, 3, 5, 1, 4] • ตัวเลขกดไม่ได้</div>
+              <div id="merge-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="merge-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="merge-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="merge-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="merge-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="merge-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="merge-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="merge-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="merge-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Merge Sort (C แนวคิด)
+void merge(int a[], int l, int m, int r){
+  int n1=m-l+1, n2=r-m, L[n1], R[n2];
+  for(int i=0;i&lt;n1;i++) L[i]=a[l+i];
+  for(int j=0;j&lt;n2;j++) R[j]=a[m+1+j];
+  int i=0,j=0,k=l;
+  while(i&lt;n1 &amp;&amp; j&lt;n2) a[k++]=(L[i]&lt;=R[j])?L[i++]:R[j++];
+  while(i&lt;n1) a[k++]=L[i++];
+  while(j&lt;n2) a[k++]=R[j++];
+}
+void merge_sort(int a[], int l, int r){
+  if(l&lt;r){ int m=(l+r)/2; merge_sort(a,l,m); merge_sort(a,m+1,r); merge(a,l,m,r); }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Quick Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Quick Sort — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ อัลกอริทึม “เรียงลำดับแบบแบ่ง–พิชิต (Divide & Conquer)” ที่ทำงานเร็วมากในทางปฏิบัติ
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: เลือก pivot แล้วแบ่งซ้าย/ขวา</li>
+                <li><b>อัลกอริทึม</b>: partition → เรียงซ้าย/ขวา</li>
+                <li><b>โปรแกรม</b>: เลือก pivot ท้ายช่วง</li>
+                <li><b>ผลการทำงาน</b>: เฉลี่ยเร็วมาก</li>
+                <li class="space-y-2">
+  <div class="flex items-center gap-2">
+    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+  </div>
+  <div class="space-y-2">
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด <b>O(n log n)/O(n²)</b></span></div>
+        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">เวลาเฉลี่ย (Average case): O(n log n)<br>
+  เกิดเมื่อแบ่งซ้าย–ขวาค่อนข้างสมดุล (เลือก pivot พอใช้ได้ เช่น สุ่ม หรือ median-of-three)<br><br>
+
+  เวลาแย่สุด (Worst case): O(n²)<br>
+  เกิดเมื่อแบ่งไม่สมดุลมาก ๆ ซ้ำ ๆ เช่น เลือก pivot เป็นค่าน้อยสุด/มากสุดทุกครั้ง (อาร์เรย์ เรียงอยู่แล้ว หรือ กลับด้าน แล้วดันเลือก pivot ปลาย)
+</div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n log n) </b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">)แบ่งพอดี ๆ ทุกชั้น</div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(log n)</b> เฉลี่ย; แย่สุด <b>O(n)</b></span></div>
+        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-sky-50 leading-relaxed">เฉลี่ย: O(log n) เลือก pivot พอใช้ได้ → แบ่งซ้าย–ขวาใกล้สมดุล → ความลึกเรียกซ้ำ ~ log n → ใช้สแตก ~ O(log n)<br><br>
+
+    แย่สุด: O(n)<br>
+    เลือก pivot แย่ซ้ำ ๆ (เช่นอาร์เรย์เรียงอยู่แล้ว + เลือกตัวปลาย) → แบ่ง 1 กับ n-1 ทุกครั้ง → ความลึก n ชั้น → ใช้สแตก ~ O(n)
+    </div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-rose-500/25 to-rose-400/20 border-rose-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-rose-300 font-semibold">❌ โดยปกติไม่ Stable</span></span></div>
+        <span class="text-rose-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-rose-50 leading-relaxed">เพราะ การสลับระหว่าง partition อาจ “ข้ามตำแหน่ง” ของค่าที่เท่ากัน ทำให้ลำดับเดิมของค่าซ้ำเปลี่ยนได้ (ต้องใช้เทคนิคพิเศษถึงจะทำให้ stable ซึ่งไม่คุ้มในทางปฏิบัติ).</div>
+    </details>
+  </div>
+</li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [9, 4, 7, 1, 3, 6, 2] • ตัวเลขกดไม่ได้</div>
+              <div id="quick-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="quick-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="quick-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="quick-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="quick-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="quick-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="quick-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="quick-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="quick-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Quick Sort (C แนวคิด)
+int partition(int a[], int l, int r){
+  int pivot=a[r], i=l;
+  for(int j=l;j&lt;r;j++) if(a[j]&lt;pivot){ int t=a[i]; a[i]=a[j]; a[j]=t; i++; }
+  int t=a[i]; a[i]=a[r]; a[r]=t; return i;
+}
+void quick_sort(int a[], int l, int r){
+  if(l&lt;r){ int p=partition(a,l,r); quick_sort(a,l,p-1); quick_sort(a,p+1,r); }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Heap Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Heap Sort — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ อัลกอริทึมเรียงลำดับที่ใช้โครงสร้างข้อมูล ฮีป (binary heap)<br>
+            สร้าง Max-Heap จากอาร์เรย์ → เอาสมาชิกมากสุด (root) ไปไว้ท้าย → ย่อฮีปลงแล้ว heapify ซ้ำ จนเรียงเสร็จ
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: สร้าง Max‑Heap แล้วดึงหัวกองไปท้าย</li>
+                <li><b>อัลกอริทึม</b>: heapify ทั้งกอง → ดึง/สลับ/heapify</li>
+                <li><b>โปรแกรม</b>: ใช้ array แทน heap</li>
+                <li><b>ผลการทำงาน</b>: พื้นที่คงที่</li>
+                <li class="space-y-2">
+  <div class="flex items-center gap-2">
+    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+  </div>
+  <div class="space-y-2">
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n log n)</b></span></div>
+        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">
+        เพราะ ทำ 2 ส่วน:<br>
+        • Build-Heap แบบ bottom-up ใช้เวลา O(n) (งานส่วนใหญ่เกิดกับโหนดลึก งานรวมไม่ถึง n log n)<br>
+        • ดึงค่าสูงสุดออก n ครั้ง แต่ละครั้ง sift-down ลึกไม่เกินความสูงฮีป ≈ log n ⇒ รวม n × log n<br>
+        สรุป O(n) + O(n log n) = O(n log n) ทุกกรณี (ไม่มีหลุดเป็น O(n²))
+      </div>
+        </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n log n) </b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">
+        • สร้างฮีป: O(n)<br>
+        • ต้อง ดึง/สลับ + heapify ทั้งหมด n ครั้ง อยู่ดี → ครั้งละ O(log n)<br>
+        • รวมแล้ว: O(n) + n·O(log n) = O(n log n)<br></div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(1)</b>(in-place)</span></div>
+        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-sky-50 leading-relaxed">
+        เพราะ Heapsort ใช้ “อาร์เรย์เดิม” เป็นฮีปเลย (array-based heap) ไม่ต้องสร้างโครงสร้างข้อมูลเพิ่มตามขนาด n
+      </div>
+    </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-rose-300 font-semibold">❌ ไม่ Stable</span></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">
+        เพราะ การสลับรากกับท้ายอาร์เรย์และการ sift-down อาจทำให้ค่าที่เท่ากันสลับลำดับเดิมได้
+      </div>
+    </details>
+  </div>
+</li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [4, 10, 3, 5, 1] • ตัวเลขกดไม่ได้</div>
+              <div id="heap-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="heap-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="heap-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="heap-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="heap-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="heap-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="heap-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="heap-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="heap-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Heap Sort (C แนวคิด)
+void heapify(int a[], int n, int i){
+  int largest=i, l=2*i+1, r=2*i+2;
+  if(l&lt;n &amp;&amp; a[l]&gt;a[largest]) largest=l;
+  if(r&lt;n &amp;&amp; a[r]&gt;a[largest]) largest=r;
+  if(largest!=i){ int t=a[i]; a[i]=a[largest]; a[largest]=t; heapify(a,n,largest); }
+}
+void heap_sort(int a[], int n){
+  for(int i=n/2-1;i&gt;=0;i--) heapify(a,n,i);
+  for(int i=n-1;i&gt;0;i--){ int t=a[0]; a[0]=a[i]; a[i]=t; heapify(a,i,0); }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Counting Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Counting Sort — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ อัลกอริทึมเรียงลำดับแบบ ไม่ใช้การเปรียบเทียบ (non-comparison) ที่นับความถี่ของค่าแต่ละตัว แล้วใช้ผลรวมสะสม (prefix sum) เพื่อวางตำแหน่งของค่าลงในผลลัพธ์อย่างรวดเร็ว เหมาะกับ ข้อมูลจำนวนเต็ม ที่ช่วงค่าไม่กว้างเกินไป
+          </div>
+ </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: นับความถี่แต่ละค่าในช่วง</li>
+                <li><b>อัลกอริทึม</b>: นับ → สะสม → สร้างผลลัพธ์แบบ Stable</li>
+                <li><b>โปรแกรม</b>: ใช้กล่อง counts</li>
+                <li><b>ผลการทำงาน</b>: เร็วเมื่อช่วงค่าน้อย</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n + k)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">เพราะ นับ n ตัว + จัดการตารางขนาด k</div>
+                     </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(n + k) </b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">
+        • นับความถี่ค่าแต่ละตัว → O(k)<br>
+        • ทำ prefix-sum กำหนดตำแหน่ง → O(k)<br>
+        • เดินอ่านอินพุตและวางผลออก → O(n)<br>
+        • สรุป: ไม่ว่าข้อมูลจะ “สวยแค่ไหน” ก็ยังต้องนับและสะสมครบช่วงค่า ⇒ O(n + k)<br></div>
+    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(n + k)</b> (ต้องมี count และ output)</span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">ต้องมี count และ output สำหรับสร้างผลลัพธ์</div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold">✅ Stable</span> (ถ้าวางจากขวา)</span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">ถ้าไล่วางจากขวาไปซ้าย จะคงลำดับของค่าที่ซ้ำกัน</div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs mb-1">
+  <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-gradient-to-r from-indigo-500/25 to-fuchsia-500/25 border border-white/20 text-slate-100">
+    อินพุต:
+    <span class="font-semibold text-white">[3, 1, 2, 1, 0, 3, 2]</span>
+  </span>
+  <span class="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-gradient-to-r from-emerald-500/25 to-teal-500/25 border border-white/20 text-emerald-50">
+    ช่วง
+    <span class="font-semibold text-white">0..3</span>
+  </span>
+</div>
+              <div class="text-[11px] mb-1">
+  <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-gradient-to-r from-indigo-500/30 to-fuchsia-500/30 border border-white/20 text-indigo-50">อินพุต</span>
+</div>
+              <div id="counting-input" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="text-[11px] mt-3 mb-1">
+  <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border border-white/20 text-emerald-50">กล่องนับ</span>
+</div>
+              <div id="counting-counts" class="grid grid-cols-4 gap-2"></div>
+              <div class="text-[11px] mt-3 mb-1">
+  <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-gradient-to-r from-amber-500/30 to-orange-500/30 border border-white/20 text-amber-50">ผลลัพธ์ (ระหว่างสร้าง)</span>
+</div>
+              <div id="counting-output" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="counting-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="counting-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="counting-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="counting-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="counting-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="counting-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="counting-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="counting-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Counting Sort (C แนวคิด)
+void counting_sort(int a[], int n, int k){
+  int c[k]; for(int i=0;i&lt;k;i++) c[i]=0;
+  for(int i=0;i&lt;n;i++) c[a[i]]++;
+  for(int i=1;i&lt;k;i++) c[i]+=c[i-1];
+  int out[n];
+  for(int i=n-1;i&gt;=0;i--){ int v=a[i]; c[v]--; out[c[v]]=v; }
+  for(int i=0;i&lt;n;i++) a[i]=out[i];
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Radix Sort -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Radix Sort (LSD) — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ อัลกอริทึมเรียงลำดับแบบ การเรียงตัวเลข ไม่ใช้การเปรียบเทียบ โดย “แยกลงถังตามหลัก” ทีละหลัก เริ่มจาก หลักหน่วย → หลักสิบ → หลักร้อย … แต่ละรอบต่อคิวกลับแบบ คงลำดับเดิม
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: เรียงตามหลัก หน่วย→สิบ→ร้อย</li>
+                <li><b>อัลกอริทึม</b>: แจกแจงลงบักเก็ต 0–9 ตามหลัก</li>
+                <li><b>โปรแกรม</b>: ใช้บักเก็ต/คิวช่วย</li>
+                <li><b>ผลการทำงาน</b>: Stable ในเวอร์ชันมาตรฐาน</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(d · (n + k))</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">
+                        • d = จำนวนหลัก (digits) ที่ต้องจัด (เช่น 32-bit ถ้าแบ่งครั้งละ r บิต ⇒ 𝑑=⌈32/𝑟⌉d=⌈32/r⌉)<br>
+                        • k = ช่วงค่าของ “แต่ละหลัก” (radix) เช่น ถ้าจัดครั้งละ r บิต ⇒ 𝑘=2^𝑟<br>
+                        • แต่ละหลักทำ Counting Sort 1 ครั้ง ⇒ ครั้งละ 𝑂(𝑛+𝑘) รวม 𝑑 ครั้ง ⇒ O(d(n+k)) ทั้งเฉลี่ยและแย่สุด (เพราะงานคงที่ตามจำนวนหลัก ไม่ขึ้นกับการสับเรียงของข้อมูล)
+                      </div>
+                     </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(d · (n + k)) </b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">
+        • ทำ Counting Sort ต่อ “หนึ่งหลัก” ใช้เวลา O(n + k)<br>
+        • มีทั้งหมด d หลัก ⇒ รวม O(d(n + k))<br>
+        • ถ้าเลือกฐาน/การแบ่งหลักคงที่ (เช่น จัดเลข 32-บิตครั้งละ 8 บิต ⇒ d=4, k=256 = คงที่) เวลา “ตามสัดส่วน” จะใกล้ O(n) ในเชิงปฏิบัติ<br></div>
+    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(n + k)</b></span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">
+                        • ปกติ: O(n + k): บัฟเฟอร์ผลลัพธ์ขนาด n + อาเรย์นับขนาด k<br>
+                        • ถ้าเป็น MSD radix แบบ recursive มีสแตกเพิ่ม O(d)<br></div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold"></span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">
+                        • Stable ได้ ถ้าแต่ละรอบใช้ stable counting/bucket sort
+                          โดยเฉพาะ LSD Radix (จัดหลักน้อย→มาก) จะ stable โดยธรรมชาติ เพราะคงลำดับของค่าที่เท่ากันในทุก pass<br>
+
+                        • ไม่ stable หาก ใช้ตัวคั่นที่ ไม่ stable
+                          ทำ in-place โดยสลับตำแหน่งจนเสียลำดับของค่าที่เท่ากัน<br>
+
+                        • MSD Radix จะ stable ได้ถ้า แยก/รวมบัคเก็ต รักษาลำดับเดิมในทุกชั้น (แต่หลาย implementation ที่ optimize อาจไม่ stable)<br>></div>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อินพุต: [170, 45, 75, 90, 2, 24] • ตัวเลขกดไม่ได้</div>
+              <div class="text-[11px] text-slate-300 mb-1">อาร์เรย์</div>
+              <div id="radix-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="text-[11px] text-slate-300 mt-3 mb-1">บักเก็ต 0–9</div>
+              <div id="radix-buckets" class="grid grid-cols-5 sm:grid-cols-10 gap-2"></div>
+
+
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="radix-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="radix-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="radix-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="radix-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="radix-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="radix-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="radix-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="radix-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Radix Sort LSD (C แนวคิด)
+#include <stdio.h>
+#include <stdlib.h>
+void msd_radix_sort(int a[], int n, int exp) {
+    if (n <= 1 || exp == 0) return;
+    int *bucket[10], size[10] = {0};
+
+    // นับจำนวนในแต่ละ bucket
+    for (int i = 0; i < 10; i++) bucket[i] = malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        int d = (a[i] / exp) % 10;
+        bucket[d][size[d]++] = a[i];
+    }
+
+    // เรียกซ้ำในแต่ละ bucket
+    for (int d = 0, idx = 0; d < 10; d++) {
+        msd_radix_sort(bucket[d], size[d], exp/10);   // recursive
+        for (int j = 0; j < size[d]; j++) a[idx++] = bucket[d][j];
+        free(bucket[d]);
+    }
+}
+void radix_sort(int a[], int n) {
+    int m = a[0];
+    for (int i = 1; i < n; i++) if (a[i] > m) m = a[i];
+    int exp = 1;
+    while (m/exp > 0) exp *= 10;
+    exp /= 10;   // เริ่มจากหลักมากสุด
+    msd_radix_sort(a, n, exp);
+}
+// ตัวอย่างการใช้งาน
+int main() {
+    int a[] = {329, 457, 657, 839, 436, 720, 355};
+    int n = sizeof(a)/sizeof(a[0]);
+    radix_sort(a, n);
+    for (int i = 0; i < n; i++) printf("%d ", a[i]);
+    return 0;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Linear Search -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Linear Search — Demo</h2>
+          <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ อัลกอรึทึมแบบการค้นหาแบบเส้นตรง ไล่เช็คข้อมูล ทีละตัว จากซ้ายไปขวา (หรือจากต้นจนจบอาร์เรย์/ลิสต์) ถ้าเจอค่าที่ตรงกับที่ต้องการ → คืนตำแหน่ง (index) ถ้าไล่จนครบแล้วยังไม่เจอ → บอกว่า "ไม่พบ"
+</div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: ไล่ตรวจสอบข้อมูลในอาร์เรย์/ลิสต์ทีละตัว จาก ตำแหน่งแรก → สุดท้าย</li>
+                <li><b>อัลกอริทึม</b>: ตรวจค่าเทียบเป้าหมาย</li>
+                <li><b>โปรแกรม</b>: ดูโค้ดภาษา C ด้านล่าง</li>
+                <li><b>ผลการทำงาน</b>: ใช้ได้กับข้อมูลไม่เรียง</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(n)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">
+                        • เวลาเฉลี่ย (Average case): O(n)→ โดยเฉลี่ยต้องตรวจสอบครึ่งหนึ่งของข้อมูลก่อนเจอ (≈ n/2 ครั้ง) → สเกลเป็น O(n)<br>
+                        • เวลาแย่สุด (Worst case): O(n)→ กรณีเจอที่ตัวสุดท้าย หรือไม่เจอเลย ต้องตรวจสอบครบทุกตัว n ครั้งk <br></div>
+                     </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(1) </b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">เจอที่ตัวแรก<br></div>
+    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่: <b>O(1)</b></span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">
+                        • O(1) → ใช้เพียงตัวแปรชั่วคราว (เช่น index, key ที่ค้นหา)<br>
+                        • ไม่ต้องสร้างโครงสร้างข้อมูลเพิ่มเติม<br></div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold">✅ Stable</span></span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">Stable โดยธรรมชาติ (เพราะไม่แตะต้องตำแหน่งของข้อมูล)</div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">อาร์เรย์: [7, 2, 9, 4], เป้าหมาย: 9 • ตัวเลขกดไม่ได้</div>
+              <div id="linear-list" class="flex flex-wrap gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="linear-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="linear-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="linear-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="linear-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="linear-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="linear-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="linear-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="linear-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Linear Search (C)
+int linear_search(int a[], int n, int x){
+  for(int i=0;i&lt;n;i++) if(a[i]==x) return i;
+  return -1;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. Binary Search -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Binary Search — Demo</h2>
+            <div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ เป็นอัลกอริทึมค้นหาที่ เร็วกว่า Linear Search แต่มีเงื่อนไขสำคัญ: 👉 ข้อมูลต้องเรียงลำดับแล้ว (Ascending หรือ Descending ก็ได้ แต่ต้องรู้ทิศทาง)
+</div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+                
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+             <li><b>หลักการทำงาน</b>: ตัดครึ่งช่วงค้นหา</li>
+                <li><b>อัลกอริทึม</b>: เปรียบเทียบค่ากลาง เลื่อนไปซ้าย/ขวา</li>
+                <li><b>โปรแกรม</b>: ดูโค้ดภาษา C ด้านล่าง</li>
+                <li><b>ผลการทำงาน</b>: เร็วมากบนข้อมูลเรียง</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(log n)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">
+                        • เวลาเฉลี่ย (Average case): O(log n) – เพราะโดยเฉลี่ยต้องแบ่งครึ่งข้อมูลหลายครั้งจนกว่าจะเจอ (ใช้ประมาณ log₂n การเปรียบเทียบ)<br>
+                        • เวลาแย่สุด (Worst case): O(log n) – เช่น ถ้า key อยู่ตำแหน่งแรก/สุดท้าย หรือไม่มีอยู่ในข้อมูลเลย ก็ต้องแบ่งครึ่งไปจนกว่าช่วงค้นหาจะว่างเปล่า <br></div>
+                     </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(1)</b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">เจอทันทีที่กลาง<br></div>
+    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่ <b></b></span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">
+                        • Iterative: O(1) → ใช้แค่ตัวแปรไม่กี่ตัว<br>
+                        • Recursive: O(log n) → เพราะกิน stack ตามความลึกของการเรียกซ้ำ<br></div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold">✅ Stable</span></span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">จะ stable หรือไม่ stable ไม่เกี่ยวข้องกับ Binary Search เพราะหน้าที่คือ หาตำแหน่งของค่าในข้อมูลที่เรียงแล้ว เท่านั้น</div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">ลิสต์เรียง: [1, 3, 4, 5, 8, 10], เป้าหมาย: 5 • ตัวเลขกดไม่ได้</div>
+              <div id="binary-list" class="grid grid-cols-6 gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="binary-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="binary-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="binary-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="binary-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="binary-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="binary-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="binary-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดแบบ Iterative</button>
+                <pre id="binary-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Binary Search (Iterative Binary Search) (C)
+int binary_search(int a[], int n, int x){
+  int lo=0, hi=n-1;
+  while(lo&lt;=hi){
+    int mid=(lo+hi)/2;
+    if(a[mid]==x) return mid;
+    if(x&lt;a[mid]) hi=mid-1; else lo=mid+1;
+  }
+  return -1;
+}</code></pre>
+
+  <button id="binary-rec-code-toggle"
+  class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">
+  ดูโค้ดแบบ Recursive
+</button>
+
+<pre id="binary-rec-code" class="code rounded-xl p-3 text-xs mt-2 hidden">
+<code>
+// Binary Search (Recursive Binary Search) (C)
+int binary_search_rec(int a[], int lo, int hi, int x) {
+    if (lo > hi) return -1;
+    int mid = (lo + hi) / 2;
+    if (a[mid] == x) return mid;
+    if (x < a[mid]) return binary_search_rec(a, lo, mid - 1, x);
+    else return binary_search_rec(a, mid + 1, hi, x);
+}
+</code>
+</pre>
+
+<script>
+  document.getElementById("binary-rec-code-toggle").addEventListener("click", function() {
+    document.getElementById("binary-rec-code").classList.toggle("hidden");
+  });
+</script>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. Hash Table (Chaining) -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-7 md:p-9">
+          <h2 class="text-2xl md:text-3xl font-extrabold">Hash Table (Chaining) — Demo</h2>
+<div class="mt-2 rounded-xl p-4 bg-gradient-to-r from-indigo-500/15 via-fuchsia-500/10 to-emerald-500/10 border border-white/10 text-sm text-slate-200">
+            คือ เป็นอัลกอริทึมโครงสร้างข้อมูลที่เก็บข้อมูลแบบ คู่คีย์–ค่า (Key–Value) โดยใช้ ฟังก์ชันแฮช (Hash Function) เพื่อคำนวณตำแหน่งในตาราง (array) ที่จะเก็บข้อมูลนั้น
+</div>
+          <div class="mt-4 grid md:grid-cols-2 gap-5">
+            <div class="card rounded-2xl p-5">
+
+              <div class="font-semibold mb-2">สรุป 5 หัวข้อ</div>
+              <ul class="list-disc pl-5 space-y-1 text-sm">
+                <li><b>หลักการทำงาน</b>: คำนวณช่องด้วย hash(k)</li>
+                <li><b>อัลกอริทึม</b>: ใส่/ค้นหาในบักเก็ต (ลิงก์ลิสต์)</li>
+                <li><b>โปรแกรม</b>: โมดูลัส + ลิสต์</li>
+                <li><b>ผลการทำงาน</b>: ใช้ Hash Function แปลง Key → index ในตาราง</li>
+                <li class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border bg-rose-500/20 text-rose-200 border-rose-400/40">ค่าบิ๊กโอ</span>
+                  </div>
+                  <div class="space-y-2">
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-fuchsia-500/20 to-pink-500/20 border-fuchsia-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>🔎</span><span>เวลาเฉลี่ย/แย่สุด: <b>O(1)/O(n)</b></span></div>
+                        <span class="text-fuchsia-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+            
+                      <div class="mt-2 text-sm text-fuchsia-50 leading-relaxed">
+                        • เวลาเฉลี่ย (Average case): ถ้า hash function กระจายดี และ load factor ไม่สูง → การค้นหา/เพิ่ม/ลบ จะใกล้ O(1) <br>
+                        • เวลาแย่สุด (Worst case): เกิดขึ้นถ้า ทุก key hash ไปอยู่ bucket เดียวกัน → ลิสต์ยาว = n → ต้องเดินเช็คทุกตัว <br></div>
+                     </details>
+    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+      <summary class="flex items-center justify-between cursor-pointer select-none">
+        <div class="flex items-center gap-2"><span>💡</span><span>ดีที่สุด: <b>O(1)</b></span></div>
+        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+      </summary>
+      <div class="mt-2 text-sm text-amber-50 leading-relaxed">👉 เพราะ ไม่มี collision เลย หรือ bucket ที่เลือกมีเพียงข้อมูลเดียว → แทรก/ค้นหา/ลบ ทำได้ทันทีโดยไม่ต้องไล่ลิสต์<br></div>
+    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-sky-500/20 to-cyan-500/20 border-sky-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⏰</span><span>เวลาในการจัดการพื้นที่ <b></b>O(m + n)</span></div>
+                        <span class="text-sky-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-sky-50 leading-relaxed">
+                        • O(m + n)<br>
+                        • m = ขนาดตาราง (buckets) → ต้องสร้างอาร์เรย์ขนาด m<br>
+                        • n = จำนวนข้อมูลที่เก็บจริง → ต้องสร้างโหนดในลิงก์ลิสต์รวม n ตัว<br>
+                        • ต้องมี pointer ในแต่ละ node ของลิสต์เพิ่มมาด้วย<br></div>
+                    </details>
+                    <details class="group rounded-xl p-3 border bg-gradient-to-r from-amber-500/25 to-orange-500/20 border-amber-400/40">
+                      <summary class="flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2"><span>⚖️</span><span>Stable: <span class="text-emerald-300 font-semibold"></span></span></div>
+                        <span class="text-amber-100/80">แตะเพื่อดู <span class="transition-transform group-open:rotate-180 inline-block">▾</span></span>
+                      </summary>
+                      <div class="mt-2 text-sm text-amber-50 leading-relaxed">
+                        • Stable Sort 👉 ถ้าค่าซ้ำกัน จะ รักษาลำดับเดิม<br>
+                        • Unstable Sort 👉 ถ้าค่าซ้ำกัน ลำดับเดิมอาจ สลับได้<br></div>
+                </li>
+              </ul>
+            </div>
+            <div class="card rounded-2xl p-5">
+              <div class="text-xs text-slate-300 mb-1">ขนาดตาราง: 7 • คีย์ใส่: [12, 44, 13, 88, 23] • หา: 23</div>
+              <div id="hash-table" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 select-none pointer-events-none"></div>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button id="hash-prev" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">ย้อน</button>
+                <button id="hash-next" class="btn rounded-xl px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">ขั้นตอนถัดไป</button>
+                <button id="hash-play" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">เล่นอัตโนมัติ</button>
+                <button id="hash-pause" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">หยุด</button>
+                <button id="hash-reset" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20">รีเซ็ต</button>
+              </div>
+              <div id="hash-note" class="chip rounded-xl px-3 py-2 text-xs mt-2 inline-block">พร้อมเริ่ม</div>
+              <div class="mt-3">
+                <button id="hash-code-toggle" class="btn rounded-xl px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 text-xs">ดูโค้ดภาษา C</button>
+                <pre id="hash-code" class="code rounded-xl p-3 text-xs mt-2 hidden"><code>// Hash Table Chaining (C แนวคิด)
+#define M 7
+typedef struct Node{ int key; struct Node*next; } Node;
+Node* T[M] = {0};
+int h(int k){ return k % M; }
+void insert(int k){ int i=h(k); Node* p=malloc(sizeof(Node)); p-&gt;key=k; p-&gt;next=T[i]; T[i]=p; }
+Node* find(int k){ int i=h(k); for(Node* p=T[i]; p; p=p-&gt;next) if(p-&gt;key==k) return p; return NULL; }</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12. Q&A / End -->
+      <section class="slide">
+        <div class="glass rounded-3xl p-8 md:p-16 text-center">
+          <div class="text-6xl">✅</div>
+          <h2 class="mt-4 text-3xl md:text-4xl font-extrabold">จบการนำเสนอ</h2>
+          <div class="mt-3 text-slate-300">ใช้สารบัญหรือเมนูเลือกหน้าเพื่อกลับไปเล่นเดโมตัวอื่น • กด “พิมพ์เป็น PDF” เพื่อบันทึก</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Helpers
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const makeChip = (v, cls="") => {
+      const d = document.createElement('div');
+      d.className = 'rounded-xl px-3 py-2 box ' + cls;
+      d.textContent = v;
+      return d;
+    };
+    // Playback helpers
+    const stepPlay = (state) => {
+      if(state.timer) return;
+      state.timer = setInterval(()=>{
+        if(state.idx >= state.states.length-1){ clearInterval(state.timer); state.timer=null; return; }
+        state.idx++;
+        state.render();
+      }, state.speed || 650);
+    };
+    const stepPause = (state) => { clearInterval(state.timer); state.timer=null; };
+    const stepReset = (state) => { clearInterval(state.timer); state.timer=null; state.idx=0; state.render(); };
+    const controllers = []; // pause all when changing page
+    const register = (c)=>{ controllers.push(c); return c; };
+    const pauseAll = ()=> controllers.forEach(c => c && c.timer && stepPause(c));
+
+    // Slides navigation
+    const slides = $$(".slide");
+    const total = slides.length;
+    const curEl = $("#cur");
+    const totalEl = $("#total");
+    const bar = $("#bar");
+    const btnPrev = $("#btnPrev");
+    const btnNext = $("#btnNext");
+    const btnPrint = $("#btnPrint");
+    const dotsWrap = $("#dots");
+    const jump = $("#jump");
+    totalEl.textContent = String(total);
+    let index = 0;
+
+    function renderDots(){
+      dotsWrap.innerHTML = "";
+      for(let i=0;i<total;i++){
+        const d = document.createElement("button");
+        d.className = "dot bg-white";
+        d.title = "ไปหน้า " + (i+1);
+        d.addEventListener("click", ()=>go(i));
+        dotsWrap.appendChild(d);
+      }
+    }
+    renderDots();
+
+    function updateUI(){
+      slides.forEach((s, i)=> s.setAttribute("aria-current", i===index ? "true" : "false"));
+      curEl.textContent = String(index+1);
+      bar.style.width = (((index+1)/total)*100) + "%";
+      $$(".dot", dotsWrap).forEach((d,i)=>{
+        d.classList.toggle("active", i===index);
+        d.style.background = i===index ? "linear-gradient(90deg, #6366f1, #d946ef)" : "rgba(255,255,255,.6)";
+      });
+      btnPrev.style.opacity = index===0 ? .5 : 1;
+      btnPrev.style.pointerEvents = index===0 ? "none" : "auto";
+      btnNext.textContent = index===total-1 ? "กลับหน้าแรก ⟲" : "ถัดไป ⟶";
+      // sync jump
+      jump.value = String(index);
+    }
+    function go(i){
+      pauseAll();
+      index = Math.max(0, Math.min(total-1, i));
+      updateUI();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    btnPrev.addEventListener("click", ()=> go(index-1));
+    btnNext.addEventListener("click", ()=> index===total-1 ? go(0) : go(index+1));
+    btnPrint.addEventListener("click", ()=> window.print());
+    jump.addEventListener("change", (e)=> go(parseInt(e.target.value, 10)));
+
+    // Index buttons
+    $$('[data-go]').forEach(b => b.addEventListener('click', ()=> go(parseInt(b.dataset.go, 10))));
+
+    // Keyboard navigation
+    window.addEventListener("keydown", (e)=>{
+      if(e.key === "ArrowRight" || e.key === "PageDown" || e.key === " "){
+        e.preventDefault(); index===total-1 ? go(0) : go(index+1);
+      } else if(e.key === "ArrowLeft" || e.key === "PageUp"){
+        e.preventDefault(); go(index-1);
+      } else if(e.key === "Home"){ e.preventDefault(); go(0); }
+      else if(e.key === "End"){ e.preventDefault(); go(total-1); }
+    });
+    updateUI();
+
+    // (ไม่มีเดโมในหน้าที่ 2 แล้ว)
+    // ---------- Bubble ----------
+    const bubbleStates = [];
+    (function(){
+      const a = [5,1,4,2];
+      bubbleStates.push({arr:a.slice(), note:'เริ่มต้น'});
+      for(let i=0;i<a.length-1;i++){
+        for(let j=0;j<a.length-1-i;j++){
+          bubbleStates.push({arr:a.slice(), note:`เปรียบเทียบ ${j} กับ ${j+1}`});
+          if(a[j] > a[j+1]){
+            [a[j], a[j+1]] = [a[j+1], a[j]];
+            bubbleStates.push({arr:a.slice(), note:`สลับ ${a[j]} ↔ ${a[j+1]}`});
+          }
+        }
+      }
+      bubbleStates.push({arr:a.slice(), note:'เรียงเสร็จ'});
+    })();
+    const bubble = register({
+      states: bubbleStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#bubble-list'), note = $('#bubble-note');
+        wrap.innerHTML = ''; this.states[this.idx].arr.forEach(v => wrap.appendChild(makeChip(v)));
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    bubble.render();
+    $('#bubble-next').addEventListener('click', ()=>{ bubble.idx = Math.min(bubble.states.length-1, bubble.idx+1); bubble.render(); });
+    $('#bubble-prev').addEventListener('click', ()=>{ bubble.idx = Math.max(0, bubble.idx-1); bubble.render(); });
+    $('#bubble-play').addEventListener('click', ()=> stepPlay(bubble));
+    $('#bubble-pause').addEventListener('click', ()=> stepPause(bubble));
+    $('#bubble-reset').addEventListener('click', ()=> stepReset(bubble));
+    $('#bubble-code-toggle').addEventListener('click', ()=> $('#bubble-code').classList.toggle('hidden'));
+
+    // ---------- Selection ----------
+    const selectionStates = [];
+    (function(){
+      const a = [7,3,5,2];
+      selectionStates.push({arr:a.slice(), note:'เริ่มต้น'});
+      for(let i=0;i<a.length-1;i++){
+        let minIdx = i;
+        for(let j=i+1;j<a.length;j++){
+          selectionStates.push({arr:a.slice(), note:`หา min ในช่วง ${i}..${a.length-1}`});
+          if(a[j] < a[minIdx]) minIdx = j;
+        }
+        if(minIdx !== i){
+          [a[i], a[minIdx]] = [a[minIdx], a[i]];
+          selectionStates.push({arr:a.slice(), note:`สลับตำแหน่ง ${i} กับ ${minIdx}`});
+        }
+      }
+      selectionStates.push({arr:a.slice(), note:'เรียงเสร็จ'});
+    })();
+    const selection = register({
+      states: selectionStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#selection-list'), note = $('#selection-note');
+        wrap.innerHTML = ''; this.states[this.idx].arr.forEach(v => wrap.appendChild(makeChip(v)));
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    selection.render();
+    $('#selection-next').addEventListener('click', ()=>{ selection.idx = Math.min(selection.states.length-1, selection.idx+1); selection.render(); });
+    $('#selection-prev').addEventListener('click', ()=>{ selection.idx = Math.max(0, selection.idx-1); selection.render(); });
+    $('#selection-play').addEventListener('click', ()=> stepPlay(selection));
+    $('#selection-pause').addEventListener('click', ()=> stepPause(selection));
+    $('#selection-reset').addEventListener('click', ()=> stepReset(selection));
+    $('#selection-code-toggle').addEventListener('click', ()=> $('#selection-code').classList.toggle('hidden'));
+
+    // ---------- Insertion ----------
+    const insertionStates = [];
+    (function(){
+      const a = [9,1,4,3];
+      insertionStates.push({arr:a.slice(), note:'เริ่มต้น'});
+      for(let i=1;i<a.length;i++){
+        const key = a[i]; let j=i-1;
+        insertionStates.push({arr:a.slice(), note:`เลือก key=${key}`});
+        while(j>=0 && a[j] > key){ a[j+1]=a[j]; j--; insertionStates.push({arr:a.slice(), note:`เลื่อนค่าไปขวา`}); }
+        a[j+1] = key; insertionStates.push({arr:a.slice(), note:`แทรก key ที่ตำแหน่ง ${j+1}`});
+      }
+      insertionStates.push({arr:a.slice(), note:'เรียงเสร็จ'});
+    })();
+    const insertion = register({
+      states: insertionStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#insertion-list'), note = $('#insertion-note');
+        wrap.innerHTML = ''; this.states[this.idx].arr.forEach(v => wrap.appendChild(makeChip(v)));
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    insertion.render();
+    $('#insertion-next').addEventListener('click', ()=>{ insertion.idx = Math.min(insertion.states.length-1, insertion.idx+1); insertion.render(); });
+    $('#insertion-prev').addEventListener('click', ()=>{ insertion.idx = Math.max(0, insertion.idx-1); insertion.render(); });
+    $('#insertion-play').addEventListener('click', ()=> stepPlay(insertion));
+    $('#insertion-pause').addEventListener('click', ()=> stepPause(insertion));
+    $('#insertion-reset').addEventListener('click', ()=> stepReset(insertion));
+    $('#insertion-code-toggle').addEventListener('click', ()=> $('#insertion-code').classList.toggle('hidden'));
+
+    // ---------- Merge ----------
+    const mergeStates = [];
+    (function(){
+      const a = [8,3,5,1,4];
+      mergeStates.push({arr:a.slice(), note:'เริ่มต้น'});
+      function mergeSort(l, r){
+        if(l>=r) return;
+        const m = Math.floor((l+r)/2);
+        mergeSort(l, m); mergeSort(m+1, r);
+        mergeStates.push({arr:a.slice(), note:`ผสานช่วง [${l},${m}] + [${m+1},${r}]`});
+        const tmp = []; let i=l, j=m+1;
+        while(i<=m && j<=r){ if(a[i]<=a[j]) tmp.push(a[i++]); else tmp.push(a[j++]); }
+        while(i<=m) tmp.push(a[i++]); while(j<=r) tmp.push(a[j++]);
+        for(let k=0;k<tmp.length;k++){ a[l+k]=tmp[k]; mergeStates.push({arr:a.slice(), note:`เขียนค่า ${tmp[k]} ไปที่ ${l+k}`}); }
+      }
+      mergeSort(0, a.length-1);
+      mergeStates.push({arr:a.slice(), note:'เรียงเสร็จ'});
+    })();
+    const merge = register({
+      states: mergeStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#merge-list'), note = $('#merge-note');
+        wrap.innerHTML = ''; this.states[this.idx].arr.forEach(v => wrap.appendChild(makeChip(v)));
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    merge.render();
+    $('#merge-next').addEventListener('click', ()=>{ merge.idx = Math.min(merge.states.length-1, merge.idx+1); merge.render(); });
+    $('#merge-prev').addEventListener('click', ()=>{ merge.idx = Math.max(0, merge.idx-1); merge.render(); });
+    $('#merge-play').addEventListener('click', ()=> stepPlay(merge));
+    $('#merge-pause').addEventListener('click', ()=> stepPause(merge));
+    $('#merge-reset').addEventListener('click', ()=> stepReset(merge));
+    $('#merge-code-toggle').addEventListener('click', ()=> $('#merge-code').classList.toggle('hidden'));
+
+    // ---------- Quick ----------
+    const quickStates = [];
+    (function(){
+      const a = [9,4,7,1,3,6,2];
+      quickStates.push({arr:a.slice(), note:'เริ่มต้น'});
+      function quick(l, r){
+        if(l>=r) return;
+        const pivot = a[r];
+        quickStates.push({arr:a.slice(), note:`เลือก pivot=${pivot} @${r}`});
+        let i=l;
+        for(let j=l;j<r;j++){
+          if(a[j] < pivot){
+            if(i!==j){ [a[i], a[j]] = [a[j], a[i]]; quickStates.push({arr:a.slice(), note:`สลับ ${a[i]} ↔ ${a[j]}`}); }
+            i++;
+          }
+        }
+        [a[i], a[r]] = [a[r], a[i]];
+        quickStates.push({arr:a.slice(), note:`ย้าย pivot ไปที่ ${i}`});
+        quick(l, i-1); quick(i+1, r);
+      }
+      quick(0, a.length-1);
+      quickStates.push({arr:a.slice(), note:'เรียงเสร็จ'});
+    })();
+    const quick = register({
+      states: quickStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#quick-list'), note = $('#quick-note');
+        wrap.innerHTML = ''; this.states[this.idx].arr.forEach(v => wrap.appendChild(makeChip(v)));
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    quick.render();
+    $('#quick-next').addEventListener('click', ()=>{ quick.idx = Math.min(quick.states.length-1, quick.idx+1); quick.render(); });
+    $('#quick-prev').addEventListener('click', ()=>{ quick.idx = Math.max(0, quick.idx-1); quick.render(); });
+    $('#quick-play').addEventListener('click', ()=> stepPlay(quick));
+    $('#quick-pause').addEventListener('click', ()=> stepPause(quick));
+    $('#quick-reset').addEventListener('click', ()=> stepReset(quick));
+    $('#quick-code-toggle').addEventListener('click', ()=> $('#quick-code').classList.toggle('hidden'));
+
+    // ---------- Heap ----------
+    const heapStates = [];
+    (function(){
+      const a = [4,10,3,5,1];
+      heapStates.push({arr:a.slice(), note:'เริ่มต้น'});
+      const n = a.length;
+      function heapify(n, i){
+        let largest = i, l=2*i+1, r=2*i+2;
+        if(l<n && a[l]>a[largest]) largest=l;
+        if(r<n && a[r]>a[largest]) largest=r;
+        if(largest!==i){
+          [a[i], a[largest]] = [a[largest], a[i]];
+          heapStates.push({arr:a.slice(), note:`heapify: สลับ ${i} กับ ${largest}`});
+          heapify(n, largest);
+        }
+      }
+      for(let i=Math.floor(n/2)-1; i>=0; i--) heapify(n, i);
+      heapStates.push({arr:a.slice(), note:'สร้าง Max‑Heap แล้ว'});
+      for(let i=n-1; i>0; i--){
+        [a[0], a[i]] = [a[i], a[0]];
+        heapStates.push({arr:a.slice(), note:`ย้ายค่าสูงสุดไปท้ายที่ ${i}`});
+        heapify(i, 0);
+      }
+      heapStates.push({arr:a.slice(), note:'เรียงเสร็จ'});
+    })();
+    const heap = register({
+      states: heapStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#heap-list'), note = $('#heap-note');
+        wrap.innerHTML = ''; this.states[this.idx].arr.forEach(v => wrap.appendChild(makeChip(v)));
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    heap.render();
+    $('#heap-next').addEventListener('click', ()=>{ heap.idx = Math.min(heap.states.length-1, heap.idx+1); heap.render(); });
+    $('#heap-prev').addEventListener('click', ()=>{ heap.idx = Math.max(0, heap.idx-1); heap.render(); });
+    $('#heap-play').addEventListener('click', ()=> stepPlay(heap));
+    $('#heap-pause').addEventListener('click', ()=> stepPause(heap));
+    $('#heap-reset').addEventListener('click', ()=> stepReset(heap));
+    $('#heap-code-toggle').addEventListener('click', ()=> $('#heap-code').classList.toggle('hidden'));
+
+    // ---------- Counting ----------
+    const countingStates = [];
+    const K = 4;
+    (function(){
+      const a = [3,1,2,1,0,3,2];
+      const counts = new Array(K).fill(0);
+      const output = new Array(a.length).fill(null);
+      countingStates.push({a:a.slice(), c:counts.slice(), out:output.slice(), note:'เริ่มต้น'});
+      for(let i=0;i<a.length;i++){
+        counts[a[i]]++; countingStates.push({a:a.slice(), c:counts.slice(), out:output.slice(), note:`นับค่า ${a[i]} → counts[${a[i]}]`});
+      }
+      for(let i=1;i<K;i++){
+        counts[i]+=counts[i-1]; countingStates.push({a:a.slice(), c:counts.slice(), out:output.slice(), note:`สะสม counts[${i}] = ${counts[i]}`});
+      }
+      for(let i=a.length-1;i>=0;i--){
+        const v=a[i]; counts[v]--; output[counts[v]]=v;
+        countingStates.push({a:a.slice(), c:counts.slice(), out:output.slice(), note:`วาง ${v} ที่ตำแหน่ง ${counts[v]}`});
+      }
+      countingStates.push({a:output.slice(), c:counts.slice(), out:output.slice(), note:'เรียงเสร็จ'});
+    })();
+    const counting = register({
+      states: countingStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const S = this.states[this.idx];
+        const inWrap = $('#counting-input'), cWrap = $('#counting-counts'), outWrap = $('#counting-output'), note = $('#counting-note');
+        inWrap.innerHTML = ''; S.a.forEach(v => inWrap.appendChild(makeChip(v)));
+        cWrap.innerHTML = '';
+        for(let i=0;i<K;i++){
+          const cell = document.createElement('div');
+          cell.className = 'bucket rounded-xl p-2 text-center';
+          cell.innerHTML = `<div class="text-[10px] text-slate-300">idx ${i}</div><div class="text-sm font-bold">${S.c[i] ?? 0}</div>`;
+          cWrap.appendChild(cell);
+        }
+        outWrap.innerHTML = '';
+        S.out.forEach(v => outWrap.appendChild(makeChip(v===null? '·' : v, v===null ? 'opacity-50' : '')));
+        note.textContent = S.note;
+      }
+    });
+    counting.render();
+    $('#counting-next').addEventListener('click', ()=>{ counting.idx = Math.min(counting.states.length-1, counting.idx+1); counting.render(); });
+    $('#counting-prev').addEventListener('click', ()=>{ counting.idx = Math.max(0, counting.idx-1); counting.render(); });
+    $('#counting-play').addEventListener('click', ()=> stepPlay(counting));
+    $('#counting-pause').addEventListener('click', ()=> stepPause(counting));
+    $('#counting-reset').addEventListener('click', ()=> stepReset(counting));
+    $('#counting-code-toggle').addEventListener('click', ()=> $('#counting-code').classList.toggle('hidden'));
+
+    // ---------- Radix ----------
+    const radixStates = [];
+    (function(){
+      let a = [170,45,75,90,2,24];
+      radixStates.push({arr:a.slice(), buckets:null, note:'เริ่มต้น'});
+      const max = Math.max(...a);
+      for(let exp=1; Math.floor(max/exp)>0; exp*=10){
+        const buckets = Array.from({length:10}, ()=>[]);
+        for(const v of a){
+          const d = Math.floor(v/exp)%10;
+          buckets[d].push(v);
+          radixStates.push({arr:a.slice(), buckets: buckets.map(b=>b.slice()), note:`แจกแจง ${v} → บักเก็ต ${d} (หลัก ${exp})`});
+        }
+        a = buckets.flat();
+        radixStates.push({arr:a.slice(), buckets: null, note:`รวบรวมจากทุกบักเก็ต (หลัก ${exp})`});
+      }
+      radixStates.push({arr:a.slice(), buckets: null, note:'เรียงเสร็จ'});
+    })();
+    const radix = register({
+      states: radixStates, idx: 0, timer: null, speed: 1200,
+      render(){
+        const S = this.states[this.idx];
+        const list = $('#radix-list'), bWrap = $('#radix-buckets'), note = $('#radix-note');
+        list.innerHTML = ''; S.arr.forEach(v => list.appendChild(makeChip(v)));
+        bWrap.innerHTML = '';
+        if(S.buckets){
+          for(let i=0;i<10;i++){
+            const col = document.createElement('div');
+            col.className = 'bucket rounded-xl p-2 flex flex-col items-center min-h-[120px]';
+            const head = document.createElement('div');
+            head.className = 'text-[10px] text-slate-300 mb-1 text-center font-semibold';
+            head.textContent = i;
+            col.appendChild(head);
+            const stack = document.createElement('div');
+            stack.className = 'flex flex-col gap-1 items-center w-full';
+            S.buckets[i].forEach(v=> stack.appendChild(makeChip(v, 'text-center')));
+            col.appendChild(stack);
+            bWrap.appendChild(col);
+          }
+        }
+        note.textContent = S.note;
+      }
+    });
+    radix.render();
+    $('#radix-next').addEventListener('click', ()=>{ radix.idx = Math.min(radix.states.length-1, radix.idx+1); radix.render(); });
+    $('#radix-prev').addEventListener('click', ()=>{ radix.idx = Math.max(0, radix.idx-1); radix.render(); });
+    $('#radix-play').addEventListener('click', ()=> stepPlay(radix));
+    $('#radix-pause').addEventListener('click', ()=> stepPause(radix));
+    $('#radix-reset').addEventListener('click', ()=> stepReset(radix));
+    $('#radix-code-toggle').addEventListener('click', ()=> $('#radix-code').classList.toggle('hidden'));
+
+    // ---------- Linear ----------
+    const linearArr = [7,2,9,4], linearTarget = 9;
+    const linearStates = [];
+    (function(){
+      linearStates.push({i:-1, note:'เริ่มต้น'});
+      for(let i=0;i<linearArr.length;i++){
+        linearStates.push({i, note:`ตรวจตำแหน่ง ${i} → ${linearArr[i]}`});
+        if(linearArr[i]===linearTarget){ linearStates.push({i, note:`พบ ${linearTarget} ที่ตำแหน่ง ${i}`}); break; }
+      }
+      if(linearStates[linearStates.length-1].note.indexOf('พบ')===-1){
+        linearStates.push({i:-1, note:'ไม่พบ'});
+      }
+    })();
+    const linear = register({
+      states: linearStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const wrap = $('#linear-list'), note=$('#linear-note');
+        wrap.innerHTML = '';
+        const cur = this.states[this.idx].i;
+        linearArr.forEach((v, i)=>{
+          const chip = makeChip(v);
+          if(i===cur) { chip.style.background = '#fbbf24'; chip.style.color = '#000'; }
+          wrap.appendChild(chip);
+        });
+        note.textContent = this.states[this.idx].note;
+      }
+    });
+    linear.render();
+    $('#linear-next').addEventListener('click', ()=>{ linear.idx = Math.min(linear.states.length-1, linear.idx+1); linear.render(); });
+    $('#linear-prev').addEventListener('click', ()=>{ linear.idx = Math.max(0, linear.idx-1); linear.render(); });
+    $('#linear-play').addEventListener('click', ()=> stepPlay(linear));
+    $('#linear-pause').addEventListener('click', ()=> stepPause(linear));
+    $('#linear-reset').addEventListener('click', ()=> stepReset(linear));
+    $('#linear-code-toggle').addEventListener('click', ()=> $('#linear-code').classList.toggle('hidden'));
+
+    // ---------- Binary ----------
+    const binArr = [1,3,4,5,8,10], target = 5;
+    const binStates = [];
+    (function(){
+      let lo=0, hi=binArr.length-1;
+      binStates.push({lo, mid:-1, hi, note:'เริ่มต้น'});
+      while(lo<=hi){
+        const mid = Math.floor((lo+hi)/2);
+        binStates.push({lo, mid, hi, note:`กลาง=${mid} ค่า=${binArr[mid]}`});
+        if(binArr[mid]===target){ binStates.push({lo, mid, hi, note:`พบ ${target} ที่ ${mid}`}); break; }
+        else if(target < binArr[mid]){ hi = mid-1; binStates.push({lo, mid:hi, hi, note:`ไปซ้าย [${lo}, ${hi}]`}); }
+        else { lo = mid+1; binStates.push({lo, mid:lo, hi, note:`ไปขวา [${lo}, ${hi}]`}); }
+      }
+      if(!/พบ/.test(binStates[binStates.length-1].note)) binStates.push({lo:0, mid:-1, hi:-1, note:'ไม่พบ'});
+    })();
+    const binary = register({
+      states: binStates, idx: 0, timer: null, speed: 650,
+      render(){
+        const list = $('#binary-list'), note = $('#binary-note'), S = this.states[this.idx];
+        list.innerHTML = '';
+        for(let i=0;i<binArr.length;i++){
+          const box = makeChip(binArr[i]);
+          if(S && i===S.mid){ box.style.background = '#8b5cf6'; box.style.color = '#fff'; }
+          if(S && (i<S.lo || i>S.hi)){ box.style.opacity = .35; }
+          list.appendChild(box);
+        }
+        note.textContent = S ? S.note : 'พร้อมเริ่ม';
+      }
+    });
+    binary.render();
+    $('#binary-next').addEventListener('click', ()=>{ binary.idx = Math.min(binary.states.length-1, binary.idx+1); binary.render(); });
+    $('#binary-prev').addEventListener('click', ()=>{ binary.idx = Math.max(0, binary.idx-1); binary.render(); });
+    $('#binary-play').addEventListener('click', ()=> stepPlay(binary));
+    $('#binary-pause').addEventListener('click', ()=> stepPause(binary));
+    $('#binary-reset').addEventListener('click', ()=> stepReset(binary));
+    $('#binary-code-toggle').addEventListener('click', ()=> $('#binary-code').classList.toggle('hidden'));
+
+    // ---------- Hash (Chaining) ----------
+    const HT_SIZE = 7;
+    const hashKeys = [12,44,13,88,23];
+    const hashFind = 23;
+    const hashStates = [];
+    (function(){
+      const buckets = Array.from({length:HT_SIZE}, ()=>[]);
+      hashStates.push({buckets: buckets.map(b=>b.slice()), note:'เริ่มต้นตารางว่าง'});
+      for(const k of hashKeys){
+        const idx = k % HT_SIZE;
+        buckets[idx].push(k);
+        hashStates.push({buckets: buckets.map(b=>b.slice()), note:`ใส่ ${k} → ช่อง ${idx}`});
+      }
+      const idx = hashFind % HT_SIZE;
+      hashStates.push({buckets: buckets.map(b=>b.slice()), hlBucket: idx, note:`ค้นหา ${hashFind}: ไปช่อง ${idx}`});
+      const pos = buckets[idx].indexOf(hashFind);
+      if(pos>=0) hashStates.push({buckets: buckets.map(b=>b.slice()), hlBucket: idx, hlPos: pos, note:`พบ ${hashFind} ในช่อง ${idx}`});
+      else hashStates.push({buckets: buckets.map(b=>b.slice()), hlBucket: idx, note:`ไม่พบในช่อง ${idx}`});
+    })();
+    const hashDemo = register({
+      states: hashStates, idx: 0, timer: null, speed: 700,
+      render(){
+        const wrap = $('#hash-table'), note = $('#hash-note'), S = this.states[this.idx];
+        wrap.innerHTML = '';
+        for(let i=0;i<HT_SIZE;i++){
+          const col = document.createElement('div');
+          col.className = 'bucket rounded-xl p-2';
+          const head = document.createElement('div');
+          head.className = 'text-[10px] text-slate-300 mb-2 text-center';
+          head.textContent = `ช่อง ${i}`;
+          col.appendChild(head);
+          const stack = document.createElement('div');
+          stack.className = 'flex flex-col gap-1';
+          (S.buckets[i]||[]).forEach((v, j)=>{
+            const chip = makeChip(v, 'text-center');
+            if(S.hlBucket===i && S.hlPos===j){ chip.style.background = '#10b981'; chip.style.color='#000'; }
+            else if(S.hlBucket===i){ chip.style.background = '#8b5cf6'; chip.style.color='#fff'; }
+            stack.appendChild(chip);
+          });
+          col.appendChild(stack);
+          wrap.appendChild(col);
+        }
+        note.textContent = S.note;
+      }
+    });
+    hashDemo.render();
+    $('#hash-next').addEventListener('click', ()=>{ hashDemo.idx = Math.min(hashDemo.states.length-1, hashDemo.idx+1); hashDemo.render(); });
+    $('#hash-prev').addEventListener('click', ()=>{ hashDemo.idx = Math.max(0, hashDemo.idx-1); hashDemo.render(); });
+    $('#hash-play').addEventListener('click', ()=> stepPlay(hashDemo));
+    $('#hash-pause').addEventListener('click', ()=> stepPause(hashDemo));
+    $('#hash-reset').addEventListener('click', ()=> stepReset(hashDemo));
+    $('#hash-code-toggle').addEventListener('click', ()=> $('#hash-code').classList.toggle('hidden'));
+
+    // เติมสีให้ "สรุป 5 หัวข้อ" ทุกหน้าแบบอัตโนมัติ (ทำครั้งเดียวพอ เพราะเป็นคอนเทนต์คงที่)
+    (function(){
+      const styles = {
+        'หลักการทำงาน': 'bg-sky-500/20 text-sky-200 border-sky-400/40',
+        'อัลกอริทึม': 'bg-violet-500/20 text-violet-200 border-violet-400/40',
+        'โปรแกรม': 'bg-amber-500/20 text-amber-200 border-amber-400/40',
+        'ผลการทำงาน': 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40',
+        'ค่าบิ๊กโอ': 'bg-rose-500/20 text-rose-200 border-rose-400/40',
+      };
+      $$('ul li').forEach(li => {
+        const html = li.innerHTML.trim();
+        const m = html.match(/^<b>([^<:]+)<\/b>:\s*(.*)$/);
+        if(!m) return;
+        const label = m[1].trim();
+        const rest = m[2];
+        const cls = styles[label];
+        if(!cls) return;
+        li.innerHTML = `<span class="inline-block mr-2 align-middle rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${cls}">${label}</span><span class="align-middle">${rest}</span>`;
+      });
+    })();
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988564ff122fd334',t:'MTc1OTQyMDYzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
